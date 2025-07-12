@@ -1,0 +1,9 @@
+{
+   "age" : "not_child",
+   "age_confidence" : 1,
+   "gender" : "male",
+   "gender_confidence" : 1,
+   "pipeline" : "body_0.3",
+   "pipeline_subtype" : "mobile",
+   "scale" : 1.000174522399902
+}
