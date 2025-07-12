@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Animator parametresine ata
-        animator.SetFloat("Speed", currentSpeed);
+        animator.SetFloat("Speed", currentSpeed/5);
 
         // Yönü değiştir
         if (moveInput != Vector3.zero)
