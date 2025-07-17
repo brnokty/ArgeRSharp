@@ -8,8 +8,12 @@ public class PlayerController : MonoBehaviour
 
     public Animator animator;
 
+    public Transform cameraTransform;
+
     private Rigidbody rb;
-    private Vector3 moveInput;
+    private Vector3 moveDirection;
+
+    private bool isDancing = false;
 
     void Start()
     {
@@ -18,33 +22,67 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Hareket girişi al
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-
-        moveInput = new Vector3(moveX, 0, moveZ).normalized;
-
-        // Hız hesapla
-        float currentSpeed = moveInput.magnitude * moveSpeed;
-
-        // Koşma tuşu basılıysa hız artır
-        if (Input.GetKey(KeyCode.LeftShift))
+        // Dance toggle
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            currentSpeed *= runMultiplier;
+            isDancing = !isDancing;
         }
 
-        // Animator parametresine ata
-        animator.SetFloat("Speed", currentSpeed/5);
-
-        // Yönü değiştir
-        if (moveInput != Vector3.zero)
+        if (isDancing)
         {
-            transform.forward = moveInput;
+            moveDirection = Vector3.zero;
+            animator.SetBool("Dance", true);
+        }
+        else
+        {
+            animator.SetBool("Dance", false);
+
+            // Input
+            float horizontal = Input.GetAxisRaw("Horizontal");
+            float vertical = Input.GetAxisRaw("Vertical");
+
+            // Kameranın yönüne göre input'u döndür
+            Vector3 camForward = cameraTransform.forward;
+            Vector3 camRight = cameraTransform.right;
+
+            camForward.y = 0;
+            camRight.y = 0;
+
+            camForward.Normalize();
+            camRight.Normalize();
+
+            moveDirection = (camForward * vertical + camRight * horizontal).normalized;
+
+            // Speed parametresi
+            float currentSpeed = moveDirection.magnitude * moveSpeed;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                currentSpeed *= runMultiplier;
+
+            animator.SetFloat("Speed", currentSpeed/5);
+
+            // Karakter yönü
+            if (moveDirection != Vector3.zero)
+            {
+                transform.forward = moveDirection;
+            }
         }
     }
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
+        if (moveDirection != Vector3.zero && !isDancing)
+        {
+            float speed = moveSpeed;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                speed *= runMultiplier;
+
+            rb.linearVelocity = moveDirection * speed;
+        }
+        else
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
     }
 }
